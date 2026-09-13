@@ -17,12 +17,9 @@ p {
 body {
     font-family: 'Segoe UI', sans-serif;
     background-color: #f5f1e6;
-    /* La capa de arriba (el degradé color crema) actúa como un "velo" que
-       atenúa la imagen de abajo — así el motivo se nota pero nunca compite
-       en contraste con el texto, sin importar en qué parte de la página caiga. */
     background-image:
         linear-gradient(rgba(245, 241, 230, 0), rgba(245, 241, 230, 0)),
-        url('/backgrounds/collage-wa.jpg');
+        url('/backgrounds/desktop-collage.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -33,6 +30,24 @@ body {
     flex-direction: column;
 }
 
+/* TABLET — pantallas medianas usan el recorte pensado para ese ancho */
+@media (max-width: 1199px) {
+    body {
+        background-image:
+            linear-gradient(rgba(245, 241, 230, 0), rgba(245, 241, 230, 0)),
+            url('/backgrounds/tablet-collage.jpg');
+    }
+}
+
+/* MOBILE — pantallas chicas usan el recorte vertical, más liviano */
+@media (max-width: 767px) {
+    body {
+        background-image:
+            linear-gradient(rgba(245, 241, 230, 0), rgba(245, 241, 230, 0)),
+            url('/backgrounds/mobile-collage.jpg');
+    }
+}
+
 /* En dispositivos táctiles, "fixed" suele trabarse o consumir batería de más
    al hacer scroll — ahí lo dejamos scrollear normal junto al contenido. */
 @media (pointer: coarse) {
@@ -40,7 +55,6 @@ body {
         background-attachment: scroll;
     }
 }
-
 /* HEADER */
 .site-header {
     display: flex;
