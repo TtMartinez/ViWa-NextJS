@@ -11,6 +11,9 @@
    porque una clase específica siempre le gana a esta regla general. */
 p {
     color: #000000;
+    font-family: "Comic Relief", system-ui;
+    font-weight: 700;
+    font-style: normal;
 }
 
 /* BODY */
