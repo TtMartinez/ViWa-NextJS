@@ -154,9 +154,12 @@ export async function POST(request) {
     statement_descriptor: "VIWA",
   };
 
-  // auto_return solo lo acepta Mercado Pago con una URL pública.
+   // auto_return y notification_url solo funcionan con una URL pública.
   const esLocal = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origen);
-  if (!esLocal) preferencia.auto_return = "approved";
+  if (!esLocal) {
+    preferencia.auto_return = "approved";
+    preferencia.notification_url = `${origen}/api/webhook-mp`;
+  }
 
   // Para producción: solo transferencia (sin tarjetas ni pagos en efectivo).
   // Se activa con MP_SOLO_TRANSFERENCIA=true. Con credenciales de prueba
