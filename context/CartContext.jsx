@@ -11,19 +11,20 @@ export function CartProvider({ children }) {
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [hydrated, setHydrated] = useState(false);
 
-  // Cargar del localStorage al montar (equivalente a la línea 1 de script.js,
-  // pero en React hay que esperar a que el componente esté en el navegador)
+  // Cargar del localStorage al montar
   useEffect(() => {
     try {
       const guardado = JSON.parse(localStorage.getItem("carrito")) || [];
-      setCarrito(guardado);
+      // Los carritos guardados antes de este cambio no tienen productoId
+      // (no se pueden cobrar con precio verificado), así que se descartan.
+      setCarrito(guardado.filter((p) => p && p.productoId));
     } catch {
       setCarrito([]);
     }
     setHydrated(true);
   }, []);
 
-  // Guardar cada vez que cambia (equivalente a guardarCarrito())
+  // Guardar cada vez que cambia
   useEffect(() => {
     if (hydrated) {
       localStorage.setItem("carrito", JSON.stringify(carrito));
@@ -36,15 +37,17 @@ export function CartProvider({ children }) {
   }, []);
 
   const addToCart = useCallback(
-    (nombre, precio, cantidad = 1) => {
+    ({ productoId, nombre, sabor = null, precio, cantidad = 1 }) => {
       setCarrito((prev) => {
-        const existe = prev.find((p) => p.nombre === nombre);
+        const existe = prev.find(
+          (p) => p.productoId === productoId && (p.sabor || null) === (sabor || null)
+        );
         if (existe) {
           return prev.map((p) =>
-            p.nombre === nombre ? { ...p, cantidad: p.cantidad + cantidad } : p
+            p === existe ? { ...p, cantidad: p.cantidad + cantidad } : p
           );
         }
-        return [...prev, { nombre, precio: Number(precio), cantidad }];
+        return [...prev, { productoId, nombre, sabor, precio: Number(precio), cantidad }];
       });
       showToast("✓ Producto agregado al carrito");
     },
@@ -52,14 +55,15 @@ export function CartProvider({ children }) {
   );
 
   const updateQty = useCallback((index, cantidad) => {
-    setCarrito((prev) =>
-      prev.map((p, i) => (i === index ? { ...p, cantidad: parseInt(cantidad) || 1 } : p))
-    );
+    const n = Math.min(50, Math.max(1, parseInt(cantidad) || 1));
+    setCarrito((prev) => prev.map((p, i) => (i === index ? { ...p, cantidad: n } : p)));
   }, []);
 
   const removeItem = useCallback((index) => {
     setCarrito((prev) => prev.filter((_, i) => i !== index));
   }, []);
+
+  const clearCart = useCallback(() => setCarrito([]), []);
 
   const total = carrito.reduce((acc, p) => acc + p.precio * p.cantidad, 0);
   const itemCount = carrito.reduce((acc, p) => acc + p.cantidad, 0);
@@ -85,6 +89,7 @@ export function CartProvider({ children }) {
         addToCart,
         updateQty,
         removeItem,
+        clearCart,
         toastMsg,
         showToast,
         cartOpen,

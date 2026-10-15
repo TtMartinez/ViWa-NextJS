@@ -29,11 +29,14 @@ export default function ProductModal() {
   const imgUrl = sanityImgUrl(producto.imagen?.asset?._ref);
 
   function handleAgregar() {
-    let nombreFinal = producto.nombre;
-    if (tieneSabores) {
-      nombreFinal += ` - ${sabores[saborIndex].nombre}`;
-    }
-    addToCart(nombreFinal, producto.precio, cantidad);
+    const sabor = tieneSabores ? sabores[saborIndex].nombre : null;
+    addToCart({
+      productoId: producto._id,
+      nombre: sabor ? `${producto.nombre} - ${sabor}` : producto.nombre,
+      sabor,
+      precio: producto.precio,
+      cantidad,
+    });
     closeModal();
   }
 

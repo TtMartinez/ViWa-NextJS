@@ -119,6 +119,7 @@ export async function POST(request) {
       producto_nombre: l.titulo,
       cantidad: l.cantidad,
       precio: l.precio,
+      es_digital: l.digital,
     }))
   );
 
@@ -147,12 +148,15 @@ export async function POST(request) {
       pending: `${origen}/compra/pendiente`,
       failure: `${origen}/compra/fallida`,
     },
-    auto_return: "approved",
     // El link de pago vence a las 24 hs (misma regla que pidió la clienta)
     expires: true,
     expiration_date_to: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
     statement_descriptor: "VIWA",
   };
+
+  // auto_return solo lo acepta Mercado Pago con una URL pública.
+  const esLocal = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origen);
+  if (!esLocal) preferencia.auto_return = "approved";
 
   // Para producción: solo transferencia (sin tarjetas ni pagos en efectivo).
   // Se activa con MP_SOLO_TRANSFERENCIA=true. Con credenciales de prueba

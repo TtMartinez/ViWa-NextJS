@@ -1,77 +1,115 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCart } from "@/context/CartContext";
-import { WHATSAPP_NUMBER } from "@/lib/categorias";
 
-function formatearPrecioWA(num) {
-  return num.toLocaleString("es-AR").replace(/\./g, "");
+function formatearPrecio(num) {
+  return num.toLocaleString("es-AR");
 }
 
 export default function PaymentModal() {
-  const { carrito, paymentOpen, closePayment, showToast } = useCart();
-  const [metodo, setMetodo] = useState("");
+  const { carrito, total, paymentOpen, closePayment } = useCart();
+  const [nombre, setNombre] = useState("");
+  const [email, setEmail] = useState("");
+  const [enviando, setEnviando] = useState(false);
+  const [error, setError] = useState("");
+
+  // Si el cliente vuelve atrás desde Mercado Pago, el navegador puede
+  // restaurar esta página con el botón todavía bloqueado: lo liberamos.
+  useEffect(() => {
+    function onPageShow(e) {
+      if (e.persisted) setEnviando(false);
+    }
+    window.addEventListener("pageshow", onPageShow);
+    return () => window.removeEventListener("pageshow", onPageShow);
+  }, []);
 
   if (!paymentOpen) return null;
 
-  function handleCerrar() {
-    setMetodo("");
+  function handleCancelar() {
+    if (enviando) return;
+    setError("");
     closePayment();
   }
 
-  function handleConfirmar() {
-    if (!metodo) {
-      showToast("⚠️ Por favor seleccioná un método de pago");
-      return;
+  async function handlePagar(e) {
+    e.preventDefault();
+    if (enviando) return;
+
+    setEnviando(true);
+    setError("");
+
+    try {
+      const res = await fetch("/api/crear-preferencia", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        // Solo mandamos QUÉ se compra y cuántos: el precio lo calcula el servidor.
+        body: JSON.stringify({
+          cliente: { nombre, email },
+          items: carrito.map((p) => ({
+            productoId: p.productoId,
+            sabor: p.sabor || null,
+            cantidad: p.cantidad,
+          })),
+        }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok || !data.init_point) {
+        throw new Error(data.error || "No pudimos iniciar el pago. Intentá de nuevo.");
+      }
+
+      window.location.href = data.init_point;
+    } catch (err) {
+      setError(err.message || "No pudimos iniciar el pago. Intentá de nuevo.");
+      setEnviando(false);
     }
-    enviarWhatsApp(metodo);
-    handleCerrar();
-  }
-
-  function enviarWhatsApp(metodoPago) {
-    let mensaje = "Hola! Quiero comprar:\n\n";
-    carrito.forEach((prod) => {
-      const subtotal = prod.precio * prod.cantidad;
-      mensaje += `- ${prod.nombre} x${prod.cantidad} ($${formatearPrecioWA(
-        prod.precio
-      )}) = $${formatearPrecioWA(subtotal)}\n`;
-    });
-    const total = carrito.reduce((acc, p) => acc + p.precio * p.cantidad, 0);
-    mensaje += `\nTotal: $${formatearPrecioWA(total)}`;
-    mensaje += `\nForma de pago: ${metodoPago}`;
-
-    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(mensaje)}`;
-    window.open(url, "_blank");
   }
 
   return (
     <div id="modal-pago">
       <div id="modal-pago-contenido">
-        <h3>¿Cómo vas a pagar?</h3>
-        <label>
-          <input
-            type="radio"
-            name="pago"
-            value="Transferencia"
-            checked={metodo === "Transferencia"}
-            onChange={(e) => setMetodo(e.target.value)}
-          />{" "}
-          Transferencia
-        </label>
-        <label>
-          <input
-            type="radio"
-            name="pago"
-            value="Efectivo"
-            checked={metodo === "Efectivo"}
-            onChange={(e) => setMetodo(e.target.value)}
-          />{" "}
-          Efectivo
-        </label>
-        <div>
-          <button onClick={handleConfirmar}>Confirmar</button>
-          <button onClick={handleCerrar}>Cancelar</button>
-        </div>
+        <h3>Finalizar compra</h3>
+        <p className="total">Total: ${formatearPrecio(total)}</p>
+
+        <form onSubmit={handlePagar}>
+          <label className="campo">
+            Nombre y apellido
+            <input
+              type="text"
+              value={nombre}
+              onChange={(e) => setNombre(e.target.value)}
+              required
+              minLength={2}
+              maxLength={80}
+              autoComplete="name"
+            />
+          </label>
+
+          <label className="campo">
+            Email (acá te avisamos de tu compra)
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              maxLength={120}
+              autoComplete="email"
+            />
+          </label>
+
+          {error && <p className="error">{error}</p>}
+
+          <div className="acciones">
+            <button type="submit" disabled={enviando}>
+              {enviando ? "Redirigiendo…" : "Pagar con Mercado Pago"}
+            </button>
+            <button type="button" onClick={handleCancelar} disabled={enviando}>
+              Cancelar
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
