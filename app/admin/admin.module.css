@@ -1,60 +1,408 @@
-.wrapper {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 30px 20px 60px;
-  font-family: inherit;
-}
-
-.wrapper h1 {
-  color: #1e3a5f;
-  margin-bottom: 24px;
-}
-
-.wrapper h2 {
-  color: #1e3a5f;
-  margin: 36px 0 12px;
-  font-size: 1.2rem;
-}
-
-.error {
-  background: #fee2e2;
-  color: #991b1b;
-  padding: 10px 14px;
-  border-radius: 6px;
-  margin-bottom: 20px;
-}
-
-.resumen {
+/* ===== Estructura del panel ===== */
+.shell {
   display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-bottom: 10px;
+  min-height: 100vh;
+  background: #f5f1e6;
+  color: #1d1d1b;
 }
 
-.card {
-  background: white;
-  border: 1px solid #eee;
-  border-radius: 10px;
-  padding: 16px 24px;
-  min-width: 180px;
+.sidebar {
+  width: 230px;
+  flex: 0 0 230px;
+  background: #1e3a5f;
+  color: #fff;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.marca {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 18px;
+  padding: 0 8px;
+}
+
+.nav {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
-.cardNumero {
+.navLink {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: #fff;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.navLink:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.navActivo {
+  background: #097ba1;
+}
+
+.usuario {
+  margin-top: auto;
+  padding: 14px 8px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.85rem;
+}
+
+.usuarioNombre {
+  font-weight: 600;
+}
+
+.usuarioRol {
+  opacity: 0.8;
+  margin-bottom: 8px;
+}
+
+.btnSalir {
+  margin: 0;
+  padding: 8px 12px;
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  border-radius: 8px;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.btnSalir:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.contenido {
+  flex: 1;
+  min-width: 0;
+  padding: 28px 32px 60px;
+}
+
+@media (max-width: 800px) {
+  .shell {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: 100%;
+    flex: none;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+  }
+  .marca {
+    margin: 0;
+  }
+  .nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .usuario {
+    margin: 0 0 0 auto;
+    padding: 0;
+    border-top: none;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+  }
+  .usuarioRol {
+    display: none;
+  }
+  .contenido {
+    padding: 20px 16px 48px;
+  }
+}
+
+/* ===== Títulos y textos ===== */
+.encabezado {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 8px 0 18px;
+}
+
+.tituloFila {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.titulo {
+  margin: 0;
   font-size: 1.6rem;
-  font-weight: bold;
-  color: #f97316;
+  color: #1e3a5f;
+  letter-spacing: 0;
+}
+
+.mail {
+  font-size: 0.82rem;
+  color: #666;
+}
+
+.dato {
+  font-size: 0.98rem;
+  margin-bottom: 4px;
+}
+
+.linkSuave {
+  color: #1e3a5f;
+  font-size: 0.9rem;
+  text-decoration: underline;
+}
+
+.linkSuave:hover {
+  color: #097ba1;
+}
+
+.etiqueta {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border: 1px solid #b9b9b0;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  color: #444;
+  background: #fff;
+}
+
+.tituloFila .etiqueta {
+  margin-left: 0;
+}
+
+/* ===== Botones, campos, avisos ===== */
+.btn {
+  display: inline-block;
+  margin: 0;
+  padding: 9px 16px;
+  border: 2px solid #1e3a5f;
+  border-radius: 8px;
+  background: #1e3a5f;
+  color: #fff;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: #097ba1;
+  border-color: #097ba1;
+  color: #fff;
+}
+
+.btnClaro {
+  background: #fff;
+  color: #1e3a5f;
+}
+
+.btnClaro:hover {
+  background: #eaf3f6;
+  border-color: #1e3a5f;
+  color: #1e3a5f;
+}
+
+.btnVerde {
+  background: #166534;
+  border-color: #166534;
+}
+
+.btnVerde:hover {
+  background: #14532d;
+  border-color: #14532d;
+}
+
+.btnPeligro {
+  background: #fff;
+  color: #991b1b;
+  border-color: #991b1b;
+}
+
+.btnPeligro:hover {
+  background: #fee2e2;
+  border-color: #991b1b;
+  color: #991b1b;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.8rem;
+  color: #444;
+}
+
+.campoAncho {
+  flex: 1 1 240px;
+}
+
+.input {
+  height: 40px;
+  padding: 0 12px;
+  border: 1.5px solid #b9b9b0;
+  border-radius: 8px;
+  background: #fff;
+  color: #1d1d1b;
+  font: inherit;
+  font-size: 0.92rem;
+}
+
+.input:focus {
+  outline: 2px solid #097ba1;
+  outline-offset: 1px;
+}
+
+.textarea {
+  height: auto;
+  padding: 10px 12px;
+  resize: vertical;
+}
+
+.aviso {
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 0.92rem;
+}
+
+.avisoOk {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.avisoError {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* ===== Tarjetas y paneles ===== */
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.kpi {
+  background: #fff;
+  border: 1px solid #e4e0d4;
+  border-radius: 12px;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.kpiTitulo {
+  font-size: 0.82rem;
+  color: #555;
+}
+
+.kpiNumero {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #1e3a5f;
+}
+
+.delta {
+  font-size: 0.78rem;
+  color: #666;
+}
+
+.deltaSube {
+  color: #166534;
+}
+
+.deltaBaja {
+  color: #991b1b;
+}
+
+.panel {
+  background: #fff;
+  border: 1px solid #e4e0d4;
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.panelTitulo {
+  margin: 0 0 4px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e3a5f;
+  letter-spacing: 0;
+}
+
+/* ===== Filtros ===== */
+.filtros {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  margin-bottom: 18px;
+}
+
+.chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.chip {
+  padding: 7px 14px;
+  border: 1.5px solid #1e3a5f;
+  border-radius: 999px;
+  background: #fff;
+  color: #1e3a5f;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.chip:hover {
+  background: #eaf3f6;
+}
+
+.chipActivo {
+  background: #1e3a5f;
+  color: #fff;
+}
+
+.chipActivo:hover {
+  background: #1e3a5f;
+}
+
+/* ===== Tablas ===== */
+.tablaWrap {
+  overflow-x: auto;
+  border-radius: 10px;
 }
 
 .tabla {
   width: 100%;
   border-collapse: collapse;
-  background: white;
-  border-radius: 8px;
-  overflow: hidden;
+  background: #fff;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
@@ -62,26 +410,63 @@
 .tabla td {
   text-align: left;
   padding: 10px 14px;
-  border-bottom: 1px solid #f0f0f0;
-  font-size: 0.92rem;
+  border-bottom: 1px solid #eee;
+  font-size: 0.9rem;
+  vertical-align: top;
 }
 
 .tabla th {
   background: #1e3a5f;
-  color: white;
+  color: #fff;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .tabla tbody tr:hover {
-  background: #f5f1e6;
+  background: #f8f5ec;
 }
 
+.noCorta {
+  white-space: nowrap;
+}
+
+.enlaceNumero {
+  color: #097ba1;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.enlaceNumero:hover {
+  text-decoration: underline;
+}
+
+.listaItems {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.paginacion {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  font-size: 0.88rem;
+  color: #555;
+}
+
+/* ===== Estados ===== */
 .badge {
+  display: inline-block;
   padding: 3px 10px;
   border-radius: 999px;
   font-size: 0.78rem;
   font-weight: 600;
-  text-transform: capitalize;
+  white-space: nowrap;
 }
 
 .estado_pendiente {
@@ -94,7 +479,159 @@
   color: #166534;
 }
 
+.estado_entregado {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
 .estado_cancelado {
   background: #fee2e2;
   color: #991b1b;
+}
+
+/* ===== Detalle del pedido ===== */
+.detalle {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 1000px) {
+  .detalle {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.dosColumnas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.totalFila {
+  text-align: right;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e3a5f;
+  margin-top: 6px;
+}
+
+.historial {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.formVertical {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.accionesRapidas {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.accionesRapidas form {
+  display: flex;
+}
+
+.accionesRapidas .btn {
+  flex: 1;
+}
+
+/* ===== Métricas ===== */
+.grafico {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 220px;
+  padding: 12px 8px 0;
+  border-bottom: 2px solid #1e3a5f;
+}
+
+.barra {
+  flex: 1 1 0;
+  min-width: 2px;
+  background: #097ba1;
+  border-radius: 3px 3px 0 0;
+}
+
+.barra:hover {
+  background: #f97316;
+}
+
+.ejeGrafico {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: #666;
+}
+
+.meter {
+  height: 7px;
+  margin-top: 6px;
+  background: #e9e4d5;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.meterRelleno {
+  height: 100%;
+  background: #f97316;
+}
+
+/* ===== Login ===== */
+.loginFondo {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: #f5f1e6;
+}
+
+.loginCaja {
+  width: 100%;
+  max-width: 380px;
+  background: #fff;
+  border: 1px solid #e4e0d4;
+  border-radius: 16px;
+  padding: 32px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+}
+
+.loginTitulo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.loginMarca {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1e3a5f;
+}
+
+.loginSub {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.loginPie {
+  text-align: center;
+  font-size: 0.78rem;
+  color: #777;
 }

@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { enviarEbook } from "@/lib/ebook";
+import { avisarPedidoNuevo } from "@/lib/avisos";
 
 export const runtime = "nodejs";
 
@@ -69,10 +70,12 @@ export async function POST(request) {
 
   const supabase = getSupabaseAdmin();
 
-  // 2. Buscamos el pedido y comprobamos que el monto coincida.
+  // 2. Buscamos el pedido (con sus productos) y comprobamos que el monto coincida.
   const { data: pedido, error: errPedido } = await supabase
     .from("pedidos")
-    .select("id, estado, total, cliente_nombre, cliente_email, pedido_items(es_digital)")
+    .select(
+      "id, estado, total, cliente_nombre, cliente_email, pedido_items(producto_nombre, cantidad, precio, es_digital)"
+    )
     .eq("id", pedidoId)
     .maybeSingle();
 
@@ -108,7 +111,11 @@ export async function POST(request) {
   }
   if (!actualizados || actualizados.length === 0) return new Response("ok", { status: 200 });
 
-  // 4. Solo el ebook va por mail: si hay algún ítem digital, lo enviamos.
+  // 4. Aviso a la dueña: entró un pedido pagado.
+  const aviso = await avisarPedidoNuevo(pedido);
+  if (!aviso.ok) console.error("[webhook-mp] No se pudo enviar el aviso:", pedido.id, aviso.error);
+
+  // 5. Solo el ebook va por mail al cliente: si hay algún ítem digital, lo enviamos.
   const tieneEbook = (pedido.pedido_items || []).some((i) => i.es_digital);
   if (tieneEbook) {
     const r = await enviarEbook({ email: pedido.cliente_email, nombre: pedido.cliente_nombre });

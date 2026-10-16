@@ -1,31 +1,38 @@
 import { NextResponse } from "next/server";
+import { COOKIE_SESION, verificarToken } from "@/lib/sesion";
 
 /**
- * Protege todo lo que empiece con /admin pidiendo usuario y contraseña
- * (autenticación HTTP Basic — el navegador muestra el cartel nativo,
- * no hace falta armar una pantalla de login aparte).
- *
- * El usuario/contraseña se definen en variables de entorno:
- * ADMIN_USER y ADMIN_PASSWORD (en .env.local y en Vercel).
+ * Protege el panel (/admin) y su API (/api/admin).
+ * Si no hay una sesión válida (cookie firmada), manda al login.
+ * Las únicas rutas públicas son la pantalla de login y el envío del formulario.
  */
-export function middleware(request) {
-  const authHeader = request.headers.get("authorization");
+const PUBLICAS = ["/admin/login", "/api/admin/login"];
 
-  if (authHeader) {
-    const base64Credentials = authHeader.split(" ")[1];
-    const [user, pass] = atob(base64Credentials).split(":");
+export async function middleware(request) {
+  const { pathname } = request.nextUrl;
+  if (PUBLICAS.includes(pathname)) return NextResponse.next();
 
-    if (user === process.env.ADMIN_USER && pass === process.env.ADMIN_PASSWORD) {
-      return NextResponse.next();
-    }
+  const secreto = process.env.ADMIN_SESSION_SECRET;
+  if (!secreto || secreto.length < 32) {
+    return new NextResponse("Falta configurar ADMIN_SESSION_SECRET", { status: 500 });
   }
 
-  return new NextResponse("Autenticación requerida", {
-    status: 401,
-    headers: { "WWW-Authenticate": 'Basic realm="Panel de administración ViWa"' },
-  });
+  const sesion = await verificarToken(request.cookies.get(COOKIE_SESION)?.value);
+  if (sesion) {
+    const res = NextResponse.next();
+    res.headers.set("Cache-Control", "no-store");
+    return res;
+  }
+
+  if (pathname.startsWith("/api/")) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  }
+  const url = request.nextUrl.clone();
+  url.pathname = "/admin/login";
+  url.search = "";
+  return NextResponse.redirect(url);
 }
 
 export const config = {
-  matcher: "/admin/:path*",
+  matcher: ["/admin/:path*", "/api/admin/:path*"],
 };
