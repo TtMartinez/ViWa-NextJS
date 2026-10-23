@@ -4,13 +4,14 @@ import { useEffect, useState } from "react";
 import { fetchProductos, sanityImgUrl } from "@/lib/sanity";
 import { useProductModal } from "@/context/ModalContext";
 
-function ProductCard({ prod }) {
+function ProductCard({ prod, etiqueta }) {
   const { openModal } = useProductModal();
   const imgUrl = sanityImgUrl(prod.imagen?.asset?._ref);
 
   return (
     <div className="product-card" onClick={() => openModal(prod)}>
       <img src={imgUrl} alt={prod.nombre} className="product-img" />
+      {etiqueta && <span className="product-tag">{etiqueta}</span>}
       <h3>{prod.nombre}</h3>
       <p>${prod.precio?.toLocaleString("es-AR")}</p>
     </div>

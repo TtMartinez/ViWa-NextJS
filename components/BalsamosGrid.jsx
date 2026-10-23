@@ -8,46 +8,45 @@ import { ProductCard } from "./ProductGrid";
 const { subcategorias, subcategoriasTitulos } = CATEGORIAS.balsamos;
 
 export default function BalsamosGrid() {
-  const [porSub, setPorSub] = useState(null); // null = cargando
+  const [productos, setProductos] = useState(null); // null = cargando
 
   useEffect(() => {
     let cancelado = false;
     fetchProductos("balsamos")
       .then((result) => {
         if (cancelado) return;
-        const agrupado = Object.fromEntries(subcategorias.map((s) => [s, []]));
-        result.forEach((prod) => {
-          if (agrupado[prod.subcategoria]) agrupado[prod.subcategoria].push(prod);
-        });
-        setPorSub(agrupado);
+        // Ordenados por subcategoría: labiales, corporales, exfoliantes
+        const ordenados = subcategorias.flatMap((sub) =>
+          result.filter((prod) => prod.subcategoria === sub)
+        );
+        setProductos(ordenados);
       })
       .catch((err) => {
         console.error("Error cargando productos:", err);
-        if (!cancelado) setPorSub(Object.fromEntries(subcategorias.map((s) => [s, []])));
+        if (!cancelado) setProductos([]);
       });
     return () => {
       cancelado = true;
     };
   }, []);
 
-  if (porSub === null) {
+  if (productos === null) {
     return <p>Cargando productos…</p>;
   }
 
+  if (productos.length === 0) {
+    return <p>No hay productos en esta categoría todavía.</p>;
+  }
+
   return (
-    <>
-      {subcategorias.map((sub) => (
-        <section className="subseccion" key={sub}>
-          <h2>{subcategoriasTitulos[sub]}</h2>
-          <div className="products-grid">
-            {porSub[sub].length === 0 ? (
-              <p>No hay productos en esta categoría todavía.</p>
-            ) : (
-              porSub[sub].map((prod) => <ProductCard key={prod._id} prod={prod} />)
-            )}
-          </div>
-        </section>
+    <div className="products-grid">
+      {productos.map((prod) => (
+        <ProductCard
+          key={prod._id}
+          prod={prod}
+          etiqueta={subcategoriasTitulos[prod.subcategoria]}
+        />
       ))}
-    </>
+    </div>
   );
 }
