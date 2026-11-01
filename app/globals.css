@@ -616,3 +616,57 @@ button:disabled {
 .products-grid {
     justify-items: center;
 }
+
+/* ===== CARRITO: que entre en pantalla y la lista tenga scroll propio ===== */
+.compra-panel {
+    display: flex;
+    flex-direction: column;
+    width: 92vw;
+    max-width: 420px;
+    max-height: 85vh;
+    max-height: 85dvh; /* dvh = alto real visible en celulares (descuenta la barra del navegador) */
+    box-sizing: border-box;
+}
+
+.compra-panel.hidden {
+    display: none;
+}
+
+.compra-panel h2 {
+    flex: 0 0 auto;
+    margin-top: 0;
+}
+
+/* La lista de productos es lo único que se desplaza */
+#carrito-items {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding-right: 4px;
+}
+
+/* Total y botones quedan siempre visibles abajo */
+.compra-panel > p,
+.compra-panel > button {
+    flex: 0 0 auto;
+}
+
+.compra-panel > button {
+    width: 100%;
+    margin-top: 8px;
+}
+
+/* Lo mismo para el modal de pago y el de producto en pantallas chicas */
+#modal-pago-contenido {
+    max-height: 90vh;
+    max-height: 90dvh;
+    overflow-y: auto;
+    box-sizing: border-box;
+    max-width: 92vw;
+}
+
+.modal-contenido {
+    max-height: 90dvh;
+}
