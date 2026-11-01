@@ -88,7 +88,7 @@ export default function PaymentModal() {
           </label>
 
           <label className="campo">
-            Email (acá te avisamos de tu compra)
+            Email
             <input
               type="email"
               value={email}

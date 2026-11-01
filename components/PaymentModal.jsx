@@ -140,7 +140,7 @@ export default function PaymentModal() {
           <h3>Pedido #{numero} registrado</h3>
           <p>
             Transferí <strong>${formatearPrecio(pedido.total)}</strong> desde cualquier banco o billetera virtual
-            (Mercado Pago, Naranja X, Ualá, tu banco…) a esta cuenta:
+            a esta cuenta:
           </p>
 
           <div className="datos-transferencia">
