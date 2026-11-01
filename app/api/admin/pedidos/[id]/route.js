@@ -31,7 +31,7 @@ export async function POST(request, { params }) {
   const supabase = getSupabaseAdmin();
   const { data: pedido, error } = await supabase
     .from("pedidos")
-    .select("id, estado, cliente_nombre, cliente_email, pedido_items(es_digital)")
+    .select("id, estado, metodo_pago, cliente_nombre, cliente_email, pedido_items(es_digital)")
     .eq("id", id)
     .maybeSingle();
 
@@ -63,6 +63,43 @@ export async function POST(request, { params }) {
     }
     await registrar(`Estado: ${ETIQUETA[pedido.estado]} → ${ETIQUETA[nuevo]}`);
     return volver("ok", "estado");
+  }
+
+  if (accion === "confirmar_pago") {
+    // Solo para pedidos por transferencia que todavía no figuran como pagados.
+    // Se permite desde "cancelado" por si el cliente transfirió pasadas las 24 hs.
+    if (pedido.metodo_pago !== "transferencia" || !["pendiente", "cancelado"].includes(pedido.estado)) {
+      return volver("error", "confirmar_no_aplica");
+    }
+    const { data: actualizado, error: errConf } = await supabase
+      .from("pedidos")
+      .update({ estado: "pagado", actualizado_en: new Date().toISOString() })
+      .eq("id", id)
+      .in("estado", ["pendiente", "cancelado"])
+      .select("id");
+    if (errConf) {
+      console.error("[admin-pedido] Error confirmando la transferencia:", errConf);
+      return volver("error", "db");
+    }
+    // Si otra persona lo confirmó un instante antes, no repetimos nada.
+    if (!actualizado || actualizado.length === 0) return volver("error", "estado_igual");
+
+    await registrar(`Transferencia confirmada: ${ETIQUETA[pedido.estado]} → Pagado`);
+
+    // Igual que con Mercado Pago: el ebook sale solo, el resto de los productos no.
+    const tieneEbook = (pedido.pedido_items || []).some((i) => i.es_digital);
+    if (tieneEbook) {
+      const r = await enviarEbook({ email: pedido.cliente_email, nombre: pedido.cliente_nombre });
+      if (r.ok) {
+        await supabase.from("pedidos").update({ ebook_enviado_en: new Date().toISOString() }).eq("id", id);
+        await registrar(`Ebook enviado a ${pedido.cliente_email}`);
+      } else {
+        console.error("[admin-pedido] No se pudo enviar el ebook tras confirmar:", id, r.error);
+        await registrar("No se pudo enviar el ebook: reenviarlo desde este pedido");
+        return volver("error", "ebook_fallo");
+      }
+    }
+    return volver("ok", "pago_confirmado");
   }
 
   if (accion === "nota") {

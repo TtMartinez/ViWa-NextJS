@@ -4,7 +4,7 @@ import Badge from "@/components/admin/Badge";
 import { exigirSesion } from "@/lib/admin-auth";
 import { POR_PAGINA, aQueryString, buscarPedidos, leerFiltros, resumenEstados } from "@/lib/pedidos-admin";
 import { facturadoDelMes } from "@/lib/metricas";
-import { ESTADOS, ETIQUETA, fechaHora, numeroPedido, pesos } from "@/lib/formato";
+import { ESTADOS, ETIQUETA, METODOS, METODO_ETIQUETA, fechaHora, numeroPedido, pesos } from "@/lib/formato";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Pedidos · Panel ViWa" };
@@ -21,7 +21,7 @@ export default async function PedidosPage({ searchParams }) {
   ]);
 
   const totalPaginas = Math.max(1, Math.ceil(total / POR_PAGINA));
-  const hayFiltros = Boolean(f.q || f.estado || f.tipo || f.desde || f.hasta);
+  const hayFiltros = Boolean(f.q || f.estado || f.tipo || f.metodo || f.desde || f.hasta);
 
   return (
     <div>
@@ -45,6 +45,11 @@ export default async function PedidosPage({ searchParams }) {
           <span className={styles.kpiTitulo}>Pendientes de pago</span>
           <span className={styles.kpiNumero}>{resumen.pendientes}</span>
         </div>
+        <Link className={`${styles.kpi} ${resumen.porConfirmar > 0 ? styles.kpiAlerta : ""}`} href="/admin?estado=pendiente&metodo=transferencia">
+          <span className={styles.kpiTitulo}>Transferencias por confirmar</span>
+          <span className={styles.kpiNumero}>{resumen.porConfirmar}</span>
+          <span className={styles.delta}>Mirá tu Mercado Pago y confirmá</span>
+        </Link>
         <div className={styles.kpi}>
           <span className={styles.kpiTitulo}>Pagados sin entregar</span>
           <span className={styles.kpiNumero}>{resumen.pagados}</span>
@@ -93,6 +98,17 @@ export default async function PedidosPage({ searchParams }) {
           </select>
         </label>
         <label className={styles.campo}>
+          Pago
+          <select className={styles.input} name="metodo" defaultValue={f.metodo}>
+            <option value="">Todos</option>
+            {METODOS.map((m) => (
+              <option key={m} value={m}>
+                {METODO_ETIQUETA[m]}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className={styles.campo}>
           Desde
           <input className={styles.input} type="date" name="desde" defaultValue={f.desde} />
         </label>
@@ -124,6 +140,7 @@ export default async function PedidosPage({ searchParams }) {
                 <th>Cliente</th>
                 <th>Qué compró</th>
                 <th>Tipo</th>
+                <th>Pago</th>
                 <th>Total</th>
                 <th>Estado</th>
               </tr>
@@ -156,6 +173,7 @@ export default async function PedidosPage({ searchParams }) {
                     )}
                   </td>
                   <td>{p.tipo_producto === "digital" ? "Digital" : "Físico"}</td>
+                  <td>{METODO_ETIQUETA[p.metodo_pago] || "Mercado Pago"}</td>
                   <td className={styles.noCorta}>{pesos(p.total)}</td>
                   <td>
                     <Badge estado={p.estado} />

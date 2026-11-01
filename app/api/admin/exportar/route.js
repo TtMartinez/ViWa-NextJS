@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSesion } from "@/lib/admin-auth";
 import { leerFiltros, traerTodosPedidos } from "@/lib/pedidos-admin";
-import { ETIQUETA, fechaHora, hoyAR, numeroPedido } from "@/lib/formato";
+import { ETIQUETA, METODO_ETIQUETA, fechaHora, hoyAR, numeroPedido } from "@/lib/formato";
 
 export const runtime = "nodejs";
 
@@ -37,6 +37,7 @@ export async function GET(request) {
     "Email",
     "Tipo",
     "Estado",
+    "Forma de pago",
     "Total",
     "Productos",
     "ID de pago (Mercado Pago)",
@@ -52,6 +53,7 @@ export async function GET(request) {
       celda(p.cliente_email),
       celda(p.tipo_producto === "digital" ? "Digital" : "Físico"),
       celda(ETIQUETA[p.estado] || p.estado),
+      celda(METODO_ETIQUETA[p.metodo_pago] || "Mercado Pago"),
       String(Number(p.total)).replace(".", ","),
       celda(productos),
       celda(p.mp_payment_id),

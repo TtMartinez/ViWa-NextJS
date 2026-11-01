@@ -5,7 +5,7 @@ import Badge from "@/components/admin/Badge";
 import BotonConfirmar from "@/components/admin/BotonConfirmar";
 import { exigirSesion } from "@/lib/admin-auth";
 import { obtenerPedido } from "@/lib/pedidos-admin";
-import { ESTADOS, ETIQUETA, fechaHora, numeroPedido, pesos } from "@/lib/formato";
+import { ESTADOS, ETIQUETA, METODO_ETIQUETA, fechaHora, numeroPedido, pesos } from "@/lib/formato";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Pedido · Panel ViWa" };
@@ -14,6 +14,7 @@ const OK = {
   estado: "Estado actualizado.",
   nota: "Nota guardada.",
   ebook: "Ebook reenviado al cliente.",
+  pago_confirmado: "Pago confirmado. El pedido quedó como pagado.",
 };
 const ERROR = {
   db: "No se pudo guardar el cambio. Intentá de nuevo.",
@@ -22,6 +23,7 @@ const ERROR = {
   ebook_no_aplica: "Este pedido no tiene un ebook pagado para reenviar.",
   ebook_fallo: "No se pudo enviar el ebook. Revisá la configuración del mail (Resend) y del archivo.",
   accion_invalida: "Acción no válida.",
+  confirmar_no_aplica: "Este pedido no se puede confirmar como transferencia.",
 };
 
 const primero = (v) => (Array.isArray(v) ? v[0] : v);
@@ -43,8 +45,15 @@ export default async function PedidoDetalle({ params, searchParams }) {
   const accion = `/api/admin/pedidos/${p.id}`;
   const puedeEbook = tieneEbook && ["pagado", "entregado"].includes(p.estado);
 
+  const esTransferencia = p.metodo_pago === "transferencia";
+  const puedeConfirmar = esTransferencia && ["pendiente", "cancelado"].includes(p.estado);
+
   let pagoTexto;
-  if (p.mp_payment_id) pagoTexto = "Aprobado por Mercado Pago";
+  if (esTransferencia) {
+    if (p.estado === "pendiente") pagoTexto = "Transferencia: esperando que llegue el dinero";
+    else if (p.estado === "cancelado") pagoTexto = "Transferencia: cancelado sin confirmar el pago";
+    else pagoTexto = "Transferencia confirmada a mano";
+  } else if (p.mp_payment_id) pagoTexto = "Aprobado por Mercado Pago";
   else if (p.estado === "pendiente") pagoTexto = "Esperando el pago";
   else if (p.estado === "cancelado") pagoTexto = "Cancelado, sin pago registrado";
   else pagoTexto = "Marcado como pagado a mano";
@@ -63,6 +72,7 @@ export default async function PedidoDetalle({ params, searchParams }) {
           <h1 className={styles.titulo}>Pedido {numeroPedido(p.numero)}</h1>
           <Badge estado={p.estado} />
           <span className={styles.etiqueta}>{p.tipo_producto === "digital" ? "Digital" : "Físico"}</span>
+          <span className={styles.etiqueta}>{METODO_ETIQUETA[p.metodo_pago] || "Mercado Pago"}</span>
         </div>
         <span className={styles.mail}>Creado el {fechaHora(p.creado_en)}</span>
       </div>
@@ -124,7 +134,16 @@ export default async function PedidoDetalle({ params, searchParams }) {
               <h2 className={styles.panelTitulo}>Pago</h2>
               <div className={styles.dato}>{pagoTexto}</div>
               {p.mp_payment_id && <span className={styles.mail}>ID de pago: {p.mp_payment_id}</span>}
-              {vence && <span className={styles.mail}>El link de pago vence el {vence}</span>}
+              {esTransferencia && p.estado === "pendiente" && (
+                <span className={styles.mail}>
+                  Buscá en tu Mercado Pago una transferencia de {pesos(p.total)} de {p.cliente_nombre || "este cliente"}.
+                </span>
+              )}
+              {vence && (
+                <span className={styles.mail}>
+                  {esTransferencia ? "Se cancela solo el" : "El link de pago vence el"} {vence}
+                </span>
+              )}
             </div>
           </div>
 
@@ -147,6 +166,17 @@ export default async function PedidoDetalle({ params, searchParams }) {
         <div>
           <div className={styles.panel}>
             <h2 className={styles.panelTitulo}>Cambiar estado</h2>
+            {puedeConfirmar && (
+              <form method="POST" action={accion} className={styles.formVertical}>
+                <input type="hidden" name="accion" value="confirmar_pago" />
+                <BotonConfirmar
+                  className={`${styles.btn} ${styles.btnVerde}`}
+                  mensaje={`¿Ya viste la transferencia de ${pesos(p.total)} en tu Mercado Pago? Al confirmar, el pedido pasa a Pagado.`}
+                >
+                  Confirmar pago recibido
+                </BotonConfirmar>
+              </form>
+            )}
             <form method="POST" action={accion} className={styles.formVertical}>
               <input type="hidden" name="accion" value="estado" />
               <select className={styles.input} name="estado" defaultValue={p.estado} aria-label="Nuevo estado">
