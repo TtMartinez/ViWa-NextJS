@@ -272,13 +272,13 @@ button {
     cursor: pointer;
     border: none;
     border-radius: 20px;
-    background-color: #16a34a;
+    background-color: #1e3a5f;
     color: white;
     transition: 0.3s;
 }
 
 button:hover {
-    background-color: #f97316;
+    background-color: #097ba1;
 }
 
 /* PANEL */
@@ -306,7 +306,7 @@ button:hover {
     bottom: 20px;
     right: 20px;
      z-index: 999;
-    background-color: #165ef9;
+    background-color: #1e3a5f;
     color: white;
     border: none;
     padding: 12px 18px;
@@ -318,7 +318,7 @@ button:hover {
 }
 
 .ver-carrito:hover {
-    background-color: #1e3a5f;
+    background-color: #097ba1;
 }
 
 @media (max-width: 500px) {
@@ -401,7 +401,7 @@ button:hover {
     position: absolute;
     top: 15px;
     right: 15px;
-    background: #f97316;
+    background: #1e3a5f;
     color: white;
     border: none;
     border-radius: 50%;
@@ -705,7 +705,11 @@ button:disabled {
 }
 
 .btn-transferencia {
-    background-color: #1e3a5f;
+    background-color: #f97316;
+}
+
+.btn-transferencia:hover {
+    background-color: #ea580c;
 }
 
 .btn-whatsapp {
@@ -717,4 +721,8 @@ button:disabled {
     text-decoration: none;
     text-align: center;
     font-size: 0.95rem;
+}
+
+.btn-whatsapp:hover {
+    background-color: #15803d;
 }
